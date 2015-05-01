@@ -1,8 +1,6 @@
-function [s] = transform_image(src_img, x_offset, y_offset, f, other_index, final_process)
-has_user_process = 0
-if nargin < 4;error('param can not less than four');end
-if nargin == 4;other_index=1;end
-if nargin == 6;has_user_process = 1;end
+function [s] = transform_image(src_img, x_offset, y_offset, f, inv_functions)
+DEBUG = 1;
+if nargin < 5;error('param can not less than four');end
 MAX_DEST_IMAGE_EDGE_LEN = 400;
 
 %x positive direction is right.
@@ -43,10 +41,6 @@ if distance_j > max_distance
    max_distance = distance_j;
 end
 
-syms res;
-f2 = solve(f-res)
-f_1 = f2(1);
-
 rate = max_distance / MAX_DEST_IMAGE_EDGE_LEN;
 dest_img_width=ceil(distance_i/rate);
 dest_img_height=ceil(distance_j/rate);
@@ -55,19 +49,20 @@ dest_x_index = 1:dest_img_width;
 dest_y_index = 1:dest_img_height;
 [X,Y]=meshgrid(dest_x_index, dest_y_index);
 dest_axis=(X+i*Y).*rate+left_border+i*bottom_border;
-dest_image = get_dest_image_data(dest_axis, f_1, x_offset, y_offset, src_img);
+dest_image = zeros([dest_img_height dest_img_width 3]);
 
-if other_index ~= 1
-dest_image2 = get_dest_image_data(dest_axis, f2(other_index), x_offset, y_offset, src_img);
-dest_image = uint8(double(dest_image) + double(dest_image2));
-elseif has_user_process 
-dest_image2 = get_dest_image_data(dest_axis, compose(final_process, f_1), x_offset, y_offset, src_img);
-dest_image = uint8(double(dest_image) + double(dest_image2));
+inv_f_size = prod(size(inv_functions));
+
+for inv_index = 1 : inv_f_size
+inv_fun = inv_functions(inv_index);
+dest_image2 = get_dest_image_data(dest_axis, inv_fun, x_offset, y_offset, src_img);
+dest_image = dest_image + double(dest_image2);
 end
 
-size(dest_image)
+dest_image = uint8(dest_image);
 
-figure,imshow(dest_image);
+figure('NumberTitle', 'off', 'Name', char(f));
+imshow(dest_image);
 axis xy
 axis on
 show_image_old(src_img, dest_img_size, dest_of_src_axis, border, rate);
@@ -75,8 +70,8 @@ show_image_old(src_img, dest_img_size, dest_of_src_axis, border, rate);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function[] = show_image_old(src_img, dest_img_size, dest_of_src_axis, border, rate)
 dest_image=zeros([dest_img_size 3]);
-dest_img_height = dest_img_size(1)
-dest_img_width = dest_img_size(2)
+dest_img_height = dest_img_size(1);
+dest_img_width = dest_img_size(2);
 R=src_img(:,:,1);
 G=src_img(:,:,2);
 B=src_img(:,:,3);
@@ -116,7 +111,7 @@ axis on
 function[dest_of_src_axis, border] = get_dest_image_axis(f, src_axis)
 MAX_INT=2^32-1;
 MIN_INT=-2^32+1;
-dest_of_src_axis = subs(f, src_axis);
+dest_of_src_axis = subs(f, src_axis + eps);
 real_part = real(dest_of_src_axis);
 imag_part = imag(dest_of_src_axis);
 imag_part(find(isnan(imag_part))) = 0;
@@ -127,13 +122,12 @@ imag_part(find(imag_part == -Inf)) = 0;
 real_part(find(real_part == -Inf)) = 0;
 dest_of_src_axis = real_part + i * imag_part;
 border = [min(real_part(:)) min(imag_part(:)) max(real_part(:)) max(imag_part(:))];
-border(find(border < MIN_INT)) = MIN_INT
-border(find(border > MAX_INT)) = MAX_INT
+border(find(border < MIN_INT)) = MIN_INT;
+border(find(border > MAX_INT)) = MAX_INT;
 return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function[dest_image] = get_dest_image_data(dest_axis, f_1, x_offset, y_offset, src_img)
-f_1
 src_img_size = size(src_img);
 src_img_height = src_img_size(1);
 src_img_width = src_img_size(2);
