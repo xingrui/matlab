@@ -7,10 +7,20 @@ src_a=imread('images/test.bmp');
 src_a=imread('images/test.jpg');
 src_a=imread('images/small.png');
 src_a=imread('images/dog.jpg');
+
+SHOW_GRID = 1;
+if SHOW_GRID
+ch = sz; cw = sz;
+h_line = 1:ch:rs;
+v_line = 1:cw:cs;
+[H_LINE,V_LINE] = meshgrid(h_line,v_line);
+src_a(:, V_LINE, :) = 0;
+src_a(H_LINE, :, :) = 0;
+end
+
 a(:,:,1)=flipud(src_a(:,:,1));
 a(:,:,2)=flipud(src_a(:,:,2));
 a(:,:,3)=flipud(src_a(:,:,3));
-set(0,'RecursionLimit',500);
 
 SHOW_ORG = 1;
 if SHOW_ORG

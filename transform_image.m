@@ -1,7 +1,8 @@
 function [s] = transform_image(src_img, x_offset, y_offset, f, inv_functions)
 DEBUG = 1;
+SHOW_OLD = 1;
 if nargin < 5;error('param can not less than four');end
-MAX_DEST_IMAGE_EDGE_LEN = 400;
+MAX_DEST_IMAGE_EDGE_LEN = 500;
 
 %x positive direction is right.
 %y positive direction is top.
@@ -65,10 +66,17 @@ figure('NumberTitle', 'off', 'Name', char(f));
 imshow(dest_image);
 axis xy
 axis on
-show_image_old(src_img, dest_img_size, dest_of_src_axis, border, rate);
+
+if SHOW_OLD
+dest_image_old = get_dest_image_data_old(src_img, dest_img_size, dest_of_src_axis, border, rate);
+figure('NumberTitle', 'off', 'Name', char(f));
+imshow(dest_image_old);
+axis xy
+axis on
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function[] = show_image_old(src_img, dest_img_size, dest_of_src_axis, border, rate)
+function[dest_image] = get_dest_image_data_old(src_img, dest_img_size, dest_of_src_axis, border, rate)
 dest_image=zeros([dest_img_size 3]);
 dest_img_height = dest_img_size(1);
 dest_img_width = dest_img_size(2);
@@ -103,9 +111,6 @@ org_index = reshape(1:prod(src_img_size), src_img_size);
 dest_image(index) = src_img(org_index);
 
 dest_image=uint8(dest_image);
-figure,imshow(dest_image);
-axis xy
-axis on
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function[dest_of_src_axis, border] = get_dest_image_axis(f, src_axis)
@@ -131,7 +136,7 @@ function[dest_image] = get_dest_image_data(dest_axis, f_1, x_offset, y_offset, s
 src_img_size = size(src_img);
 src_img_height = src_img_size(1);
 src_img_width = src_img_size(2);
-org_Z=subs(f_1, dest_axis)-x_offset-i*y_offset + 1 + i;
+org_Z=subs(f_1, dest_axis + eps)-x_offset-i*y_offset + 1 + i;
 org_x=round(imag(org_Z));
 org_y=round(real(org_Z));
 
