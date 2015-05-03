@@ -4,18 +4,25 @@ clc
 clear
 src_a=imread('images/autonavi.jpg');
 src_a=imread('images/test.bmp');
-src_a=imread('images/test.jpg');
 src_a=imread('images/small.png');
-src_a=imread('images/dog.jpg');
+src_a=imread('images/test.bmp');
+src_a=imread('images/test.jpg');
+
+%src_a = uint8(ones(400, 600, 3) * 255);
 
 SHOW_GRID = 1;
 if SHOW_GRID
+sz = 100
+rs = size(src_a, 1);
+cs = size(src_a, 2);
 ch = sz; cw = sz;
 h_line = 1:ch:rs;
 v_line = 1:cw:cs;
 [H_LINE,V_LINE] = meshgrid(h_line,v_line);
-src_a(:, V_LINE, :) = 0;
-src_a(H_LINE, :, :) = 0;
+%src_a(H_LINE, :, :) = 0;
+%src_a(:, V_LINE, :) = 0;
+src_a(:, V_LINE, 1) = 0;
+src_a(H_LINE, :, 2) = 0;
 end
 
 a(:,:,1)=flipud(src_a(:,:,1));
@@ -40,12 +47,25 @@ syms x
 
 ONE_TEST = 0;
 
-TEST_QUB = 1;%PASS
-TEST_EXP = 1; %PASS
-TEST_FOUR = 1; %PASS
-TEST_SQUARE = 1; %PASS
-TEST_FAT = 1; %PASS
-TEST_INV = 1; %PASS
+TEST_COS = 1;%PASS
+TEST_QUB = 0;%PASS
+TEST_EXP = 0; %PASS
+TEST_FOUR = 0; %PASS
+TEST_SQUARE = 0; %PASS
+TEST_FAT = 0; %PASS
+TEST_INV = 0; %PASS
+
+if TEST_COS
+% cos(x)
+f=cos(x*2*pi/width)
+syms res;
+f2 = solve(f-res);
+f_1 = [f2(1), width - f2(1)];
+transform_image(a, 0, 0, f, f_1)
+if ONE_TEST
+return
+end
+end
 
 if TEST_QUB
 % x^3
