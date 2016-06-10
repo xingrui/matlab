@@ -4,9 +4,9 @@ clc
 clear
 src_a=imread('images/autonavi.jpg');
 src_a=imread('images/test.bmp');
-src_a=imread('images/small.png');
+%src_a=imread('images/small.png');
 src_a=imread('images/test.bmp');
-src_a=imread('images/test.jpg');
+src_a=imread('images/dog.jpg');
 
 %src_a = uint8(ones(400, 600, 3) * 255);
 
