@@ -14,7 +14,7 @@ axis equal;
 figure;
 
 res = conj(points);
-m = -0.2;
+m = 0;
 n = m + 1;
 points .^ n;
 res = 1 ./ (points .^ n);
