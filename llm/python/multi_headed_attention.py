@@ -1,3 +1,5 @@
+# 信息来自 https://juejin.cn/post/7241859817563389989
+# matmul 广播功能
 import numpy as np
 import torch
 from torch import Tensor
